@@ -37,7 +37,7 @@ ovlRefBlockSize=2000000
 
 Pbalign read alignment command and parameters:
 ```
-pbalign movie.fofn --nproc 22
+pbalign --nproc 22
 ```
 Quiver command and parameters: 
 ```

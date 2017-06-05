@@ -1,4 +1,4 @@
-#Structural Annotation
+# Structural Annotation
 ### This is sequence of operations and linux bash commands to transfer structural annotation from one version of the reference genome to another
 get promoters annotation (flanks 500n after coding start & 1000n before coding start)
 ```

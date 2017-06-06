@@ -43,3 +43,27 @@ Quiver v2.1.0:
 ```
 quiver --referenceFilename= -j22 --annotateGFF -o 
 ```
+Trimmomatic v0.35
+```
+trimmomatic-0.35.jar PE ILLUMINACLIP:TruSeq3-PE.fa:2:30:15 TRAILING:30 MINLEN:50
+```
+BBTools ecc.sh script v35.82
+```
+ecc.sh in= in2= out1= out2= hist= histout=
+```
+Bowtie2 v2.2.9
+```
+bowtie2 -x -1 -2 -X 300 -p 7
+```
+Samblaster v0.1.24
+```
+samblaster -i -o 
+```
+Pilon v1.20
+```
+pilon-1.20.jar --genome --bam --output --vcf --chunksize 12000000 --diploid
+```
+ScaffMatch v0.9
+```
+scaffmatch -w ./scfm_greedy/ -c -1 -2 -i 135000,300 -p fr,fr -s 60000,50 -t 1 -g max_weight -l
+```

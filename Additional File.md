@@ -1,11 +1,11 @@
-# Reference genome sequence assembly and processing
-Assembly command and parameters:
+# Script 1. Reference genome sequence assembly and processing commands and parameters used
+PBcR v8.3rc2:
 
 ```
 PBcR -sensitive -length 500 -partitions 200 -l -s -fastq genomeSize=367000000
 ```
 
-PBcR specification file for genome assembly parameters:
+PBcR v8.3rc2 specification file content:
 
 ```
 ovlMemory=32
@@ -35,11 +35,11 @@ ovlRefBlockLength=0
 ovlRefBlockSize=2000000
 ```
 
-Pbalign read alignment command and parameters:
+Pbalign v3.0:
 ```
 pbalign --nproc 22
 ```
-Quiver command and parameters: 
+Quiver v2.1.0: 
 ```
 quiver --referenceFilename= -j22 --annotateGFF -o 
 ```

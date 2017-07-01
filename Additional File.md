@@ -64,4 +64,9 @@ pilon-1.20.jar --genome --bam --output --vcf --chunksize 12000000 --diploid
 ```
 scaffmatch -w ./scfm_greedy/ -c -1 -2 -i 135000,300 -p fr,fr -s 60000,50 -t 1 -g max_weight -l
 ```
+### BUSCO v3
+```
+run_BUSCO.py -i -o -l -m genome -c 5 -sp arabidopsis --long
+```
+
 # Script 2. SNV calling commands and parameters

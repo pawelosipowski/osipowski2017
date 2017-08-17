@@ -61,10 +61,6 @@ samblaster -i -o
 ```
 pilon-1.20.jar --genome --bam --output --vcf --chunksize 12000000 --diploid
 ```
-### ScaffMatch v0.9
-```
-scaffmatch -w ./scfm_greedy/ -c -1 -2 -i 135000,300 -p fr,fr -s 60000,50 -t 1 -g max_weight -l
-```
 ### BUSCO v3
 ```
 run_BUSCO.py -i -o -l -m genome -c 5 -sp arabidopsis --long

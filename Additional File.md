@@ -61,16 +61,24 @@ samblaster -i -o
 ```
 pilon-1.20.jar --genome --bam --output --vcf --chunksize 12000000 --diploid
 ```
+### ScaffMatch v0.9
+```
+scaffmatch -w ./scfm_greedy/ -c -1 -2 -i 135000,300 -p fr,fr -s 60000,50 -t 1 -g max_weight -l
+```
 ### BUSCO v3
 ```
 run_BUSCO.py -i -o -l -m genome -c 5 -sp arabidopsis --long
 ```
 
-## Script 2. Transposable elements detection
+## Script 2. Transposable element genome annotation
 ```
 BuildDatabase -name 
 RepeatModeler -pa 16 -database 
 RepeatMasker -pa 22 -s -no_is -nolow -norna -lib -xm -ace -u -gff -excln -dir 
+```
+## Script 3. Genome structural and functional annotation
+```
+
 ```
 
 ## SNV calling commands and parameters

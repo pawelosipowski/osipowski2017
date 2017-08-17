@@ -1,4 +1,5 @@
-# Script 1. Reference genome sequence assembly and processing commands and parameters used
+# Additional file. Scripts.
+## Script 1. Reference genome sequence assembly and processing commands and parameters used
 ### PBcR v8.3rc2:
 ```
 PBcR -sensitive -length 500 -partitions 200 -l -s -fastq genomeSize=367000000
@@ -69,4 +70,4 @@ scaffmatch -w ./scfm_greedy/ -c -1 -2 -i 135000,300 -p fr,fr -s 60000,50 -t 1 -g
 run_BUSCO.py -i -o -l -m genome -c 5 -sp arabidopsis --long
 ```
 
-# Script 2. SNV calling commands and parameters
+## Script 2. SNV calling commands and parameters

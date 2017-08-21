@@ -1,4 +1,4 @@
-# Additional file. Scripts.
+# Additional file. Commands.
 ## Script 1. Reference genome sequence assembly and processing commands and parameters used
 ### PBcR v8.3rc2:
 ```

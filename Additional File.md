@@ -1,10 +1,10 @@
 # Additional file. Commands.
 ## Script 1. Reference genome sequence assembly and processing commands and parameters used
-### 1.1 PBcR v8.3rc2:
 ```
 PBcR -sensitive -length 500 -partitions 200 -l -s -fastq genomeSize=367000000
-
-### PBcR v8.3rc2 specification file content:
+```
+```
+PBcR v8.3rc2 specification file content:
 ovlMemory=32
 ovlStoreMemory=32000
 merylMemory=32000
@@ -31,96 +31,40 @@ ovlHashBlockLength=300000000
 ovlRefBlockLength=0
 ovlRefBlockSize=2000000
 ```
-### 1.2 Pbalign v3.0:
+
 ```
 pbalign --nproc 22
-```
-### 1.3 Quiver v2.1.0: 
-```
 quiver --referenceFilename= -j22 --annotateGFF -o 
-```
-### 1.4 Trimmomatic v0.35
-```
 trimmomatic-0.35.jar PE ILLUMINACLIP:TruSeq3-PE.fa:2:30:15 TRAILING:30 MINLEN:50
-```
-### 1.5 BBTools ecc.sh script v35.82
-```
 ecc.sh in= in2= out1= out2= hist= histout=
-```
-### 1.6 Bowtie2 v2.2.9
-```
 bowtie2 -x -1 -2 -X 300 -p 7
-```
-### 1.7 Samblaster v0.1.24
-```
 samblaster -i -o 
-```
-### 1.8 Pilon v1.20
-```
 pilon-1.20.jar --genome --bam --output --vcf --chunksize 12000000 --diploid
-```
-### 1.9 ScaffMatch v0.9
-```
-scaffmatch -w ./scfm_greedy/ -c -1 -2 -i 135000,300 -p fr,fr -s 60000,50 -t 1 -g max_weight -l
-```
-### 1.10 BUSCO v3
-```
 run_BUSCO.py -i -o -l -m genome -c 5 -sp arabidopsis --long
 ```
-
 ## Script 2. Transposable element genome annotation
 ```
 BuildDatabase -name 
 RepeatModeler -pa 16 -database 
 RepeatMasker -pa 22 -s -no_is -nolow -norna -lib -xm -ace -u -gff -excln -dir 
 ```
-## Script 3. Genome structural and functional annotation
+## Script 3. Genome structural and functional annotation (main approach)
 ```
-Stworzenie indeksu genomu
-samtools faidx data/genome.fasta
+RepeatMasker -pa 12 -species viridiplantae -xsmall -gff -dir 
 
-# Wykrywanie elementów powtarzalnych
-RepeatMasker -pa 12 -species viridiplantae -xsmall -gff -dir repeat_repbase genome.fasta
+CpGcluster.pl CpG 50 1e-5 
 
-# Wykrywanie wysp CpG
-mkdir CpG
-while read line
-do
-    if [[ ${line:0:1} == '>' ]]
-    then
-        outfile=CpG/${line#>}.fa
-        echo $line > $outfile
-    else
-        echo $line >> $outfile
-    fi
-done < data/genome.fasta
-git clone https://github.com/bioinfoUGR/cpgcluster.git
-perl cpgcluster/CpGcluster.pl CpG 50 1e-5 
-rm CpG/*.fa CpG/*.txt-log.txt
+barrnap --kingdom euk --threads 8 --reject 0.8 
+barrnap --kingdom mito --threads 8 --reject 0.8 
 
-# Przewidywanie rRNA
-barrnap --kingdom euk --threads 8 --reject 0.8 data/genome.fasta > rna_abinitio/barrnap_euk.gff3
-barrnap --kingdom mito --threads 8 --reject 0.8 data/genome.fasta > rna_abinitio/barrnap_mito.gff3
-cat rna_abinitio/barrnap_euk.gff3 rna_abinitio/barrnap_mito.gff3 > rna_abinitio/barrnap.gff3
+aragorn -v -t -i -l -w -o 
 
-# Przewidywanie tRNA
-aragorn -v -t -i -l -w -o rna_abinitio/aragorn.txt data/genome.fasta
+cmscan --cpu 8 -Z 684.576320 --cut_ga --rfam --nohmmonly --tblout --fmt 2 --clanin 
 
-# Przewidywanie innych niekodujących RNA
-mkdir -p rfam
-wget -O rfam/Rfam.cm.gz ftp://ftp.ebi.ac.uk/pub/databases/Rfam/12.2/Rfam.cm.gz
-wget -O rfam/Rfam.claninfo ftp://ftp.ebi.ac.uk/pub/databases/Rfam/12.2/Rfam12.2.claninfo 
-gunzip rfam/Rfam.cm.gz
-cmpress rfam/Rfam.cm
-# RFAM genome size: 684.576320
-cmscan --cpu 8 -Z 684.576320 --cut_ga --rfam --nohmmonly --tblout rfam/rfam.tblout --fmt 2 --clanin rfam/Rfam.claninfo rfam/Rfam.cm data/genome.fasta > rfam/rfam.cmscan
-grep -v " = " rfam/rfam.tblout > rfam/rfam.deoverlapped.tblout
+makeblastdb -in  -out  -dbtype nucl -title 
+blastn -query  -db -task  -num_threads 8 -evalue 1e-3 -max_target_seqs 1 -outfmt "6 qseqid sseqid sstart send pident qcovhsp evalue" -out
 
-# Mapowanie genów miRNA wykrytych na poprzedniej wersji genomu
-makeblastdb -in data/genome.fasta -out data/genome -dbtype nucl -title "Cucumber genome assembly B10v2"
-blastn -query sRNA/miRNA.fasta -db data/genome -task megablast -num_threads 8 -evalue 1e-3 -max_target_seqs 1 -outfmt "6 qseqid sseqid sstart send pident qcovhsp evalue" -out sRNA/miRNA.outfmt6
 
-#################################################################################################################################################
 
 # Kontrola jakości krótkich odczytów RNA-Seq (usuwanie adapterów i rejonów o niskiej jakości) dla próbki $sample
 bbduk2.sh -Xmx2g threads=8 in=fastq/$sample_R1.fastq.gz in2=fastq/$sample_R2.fastq.gz out=fastq_trim/$sample_R1.fastq.gz out2=fastq_trim/$sample_R2.fastq.gz  qtrim=w trimq=5 rref=illumina.fasta k=23 mink=11 hdist=1 tbo tpe forcetrimleft=10 minlength=50 removeifeitherbad=t overwrite=t stats=status/$sample.bbduk2_adapters.txt 2> status/$sample.bbduk2_trimming.txt
@@ -273,7 +217,6 @@ done
 cd summary
 zip -r interpro_html.zip interpro_html
 rm -rf interpro_html
-
 ```
 
 ## SNV calling commands and parameters

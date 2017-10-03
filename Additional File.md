@@ -66,6 +66,21 @@ vcffilter -f "SAF > 5"
 vcffilter -f "SAR > 5" 
 
 ```
+## Script 5. GATK variant calling and filtering commands
+```
+mdust -w 6 -v 20 -c 
+samtools faidx 
+freebayes -f -b
+vcffilter -f "QUAL > 30" 
+lcr_filter.py - our own script
+vcffilter -f "DP > 30"
+avg_depth=$(cut -f 8 .vcf | awk -F \; '{print $8}'| sed 's/DP=//' | sed '/^$/d' | awk '{a+=$1} END{print a/NR}')
+depth_score=$(echo "$avg_depth + sqrt($avg_depth) * 3" | bc -l)
+vcffilter -f "DP < $depth_score" 
+vcffilter -f "SAF > 5" 
+vcffilter -f "SAR > 5" 
+
+```
 ## Script 4. Transposable element genome annotation
 ```
 BuildDatabase -name 

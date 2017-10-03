@@ -134,6 +134,6 @@ cdna_alignment_orf_to_genome_orf.pl
 ```
 ## Script 9. Ab initio genome structural annotation (complementary approach)
 ```
-
+tophat2 --num-threads 12 -o
 braker.pl --AUGUSTUS_CONFIG_PATH= --AUGUSTUS_BIN_PATH= --AUGUSTUS_SCRIPTS_PATH= --BAMTOOLS_PATH= --GENEMARK_PATH= --cores 20 --species= --gff3 --genome= --bam=
 ```

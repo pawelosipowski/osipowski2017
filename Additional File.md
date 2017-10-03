@@ -82,13 +82,19 @@ vcffilter -f "SAR > 5"
 
 
 ```
-## Script 4. Transposable element genome annotation
+## Script 6. GRIDSS SV calling
 ```
 BuildDatabase -name 
 RepeatModeler -pa 16 -database 
 RepeatMasker -pa 22 -s -no_is -nolow -norna -lib -xm -ace -u -gff -excln -dir 
 ```
-## Script 5. Genome structural annotation (main approach)
+## Script 6. Transposable element genome annotation
+```
+BuildDatabase -name 
+RepeatModeler -pa 16 -database 
+RepeatMasker -pa 22 -s -no_is -nolow -norna -lib -xm -ace -u -gff -excln -dir 
+```
+## Script 7. Genome structural annotation (main approach)
 ```
 RepeatMasker -pa 12 -species viridiplantae -xsmall -gff -dir 
 CpGcluster.pl CpG 50 1e-5 
@@ -253,5 +259,3 @@ cd summary
 zip -r interpro_html.zip interpro_html
 rm -rf interpro_html
 ```
-
-## SNV calling commands and parameters

@@ -74,7 +74,7 @@ vcffilter -f "SAR > 5"
 -T AnalyzeCovariates -R -before -after -plots
 -T PrintReads -R -I-BQSR -o
 -T HaplotypeCaller -R -I --emitRefConfidence -o
--T GenotypeGVCFs -R -V -V -o                                                                    
+-T GenotypeGVCFs -R -V -V -o # joint genoyping                                                                   
 -T SelectVariants -R -V  -selectType SNP -o # SNP extraction
 -T VariantFiltration -R - V -filter "QD < 2.0 || FS > 60.0 || SOR > 3.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0" -filterName -o # SNP filtration
 -T SelectVariants -R -V -selectType INDEL -o # INDEL extraction

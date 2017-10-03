@@ -31,6 +31,7 @@ ovlHashBlockLength=300000000
 ovlRefBlockLength=0
 ovlRefBlockSize=2000000
 ```
+## Script 2. Reference genome correction and quality assessment
 
 ```
 pbalign --nproc 22
@@ -42,25 +43,43 @@ samblaster -i -o
 pilon-1.20.jar --genome --bam --output --vcf --chunksize 12000000 --diploid
 run_BUSCO.py -i -o -l -m genome -c 5 -sp arabidopsis --long
 ```
-## Script 2. Transposable element genome annotation
+## Script 3. Short read alignment for variant calling
+```
+trimmomatic-0.35.jar PE  ILLUMINACLIP:Trimmomatic-0.35/adapters/TruSeq3-PE.fa:2:30:15 TRAILING:30 MINLEN:50
+bfc -s 367m -t16 -k 55 
+bwa index
+bwa mem -t 7 -R 
+samblaster -i -o
+```
+## Script 4. Freebayses variant calling and filtering commands
+```
+mdust -w 6 -v 20 -c 
+samtools faidx 
+freebayes -f -b
+vcffilter -f "QUAL > 30" 
+lcr_filter.py - our own script
+vcffilter -f "DP > 30"
+avg_depth=$(cut -f 8 .vcf | awk -F \; '{print $8}'| sed 's/DP=//' | sed '/^$/d' | awk '{a+=$1} END{print a/NR}')
+depth_score=$(echo "$avg_depth + sqrt($avg_depth) * 3" | bc -l)
+vcffilter -f "DP < $depth_score" 
+vcffilter -f "SAF > 5" 
+vcffilter -f "SAR > 5" 
+
+```
+## Script 4. Transposable element genome annotation
 ```
 BuildDatabase -name 
 RepeatModeler -pa 16 -database 
 RepeatMasker -pa 22 -s -no_is -nolow -norna -lib -xm -ace -u -gff -excln -dir 
 ```
-## Script 3. Genome structural and functional annotation (main approach)
+## Script 5. Genome structural annotation (main approach)
 ```
 RepeatMasker -pa 12 -species viridiplantae -xsmall -gff -dir 
-
 CpGcluster.pl CpG 50 1e-5 
-
 barrnap --kingdom euk --threads 8 --reject 0.8 
 barrnap --kingdom mito --threads 8 --reject 0.8 
-
 aragorn -v -t -i -l -w -o 
-
 cmscan --cpu 8 -Z 684.576320 --cut_ga --rfam --nohmmonly --tblout --fmt 2 --clanin 
-
 makeblastdb -in  -out  -dbtype nucl -title 
 blastn -query  -db -task  -num_threads 8 -evalue 1e-3 -max_target_seqs 1 -outfmt "6 qseqid sseqid sstart send pident qcovhsp evalue" -out
 

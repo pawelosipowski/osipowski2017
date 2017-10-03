@@ -51,7 +51,7 @@ bwa index
 bwa mem -t 7 -R 
 samblaster -i -o
 ```
-## Script 4. Freebayses variant calling and filtering commands
+## Script 4. Freebayses variant calling, genotyping and filtering commands
 ```
 mdust -w 6 -v 20 -c 
 samtools faidx 
@@ -66,19 +66,20 @@ vcffilter -f "SAF > 5"
 vcffilter -f "SAR > 5" 
 
 ```
-## Script 5. GATK variant calling and filtering commands
+## Script 5. GATK variant calling, joint genotyping and filtering commands
 ```
-mdust -w 6 -v 20 -c 
-samtools faidx 
-freebayes -f -b
-vcffilter -f "QUAL > 30" 
-lcr_filter.py - our own script
-vcffilter -f "DP > 30"
-avg_depth=$(cut -f 8 .vcf | awk -F \; '{print $8}'| sed 's/DP=//' | sed '/^$/d' | awk '{a+=$1} END{print a/NR}')
-depth_score=$(echo "$avg_depth + sqrt($avg_depth) * 3" | bc -l)
-vcffilter -f "DP < $depth_score" 
-vcffilter -f "SAF > 5" 
-vcffilter -f "SAR > 5" 
+-T HaplotypeCaller -R -I --genotyping_mode DISCOVERY -stand_emit_conf 10 -stand_call_conf 30 -o
+-T BaseRecalibrator -R -I -knownSites -o # for known sites Freebayes results were used
+-T BaseRecalibrator -R -I -knownSites -BQSR -o # second recallibration round
+-T AnalyzeCovariates -R -before -after -plots
+-T PrintReads -R -I-BQSR -o
+-T HaplotypeCaller -R -I --emitRefConfidence -o
+-T GenotypeGVCFs -R -V -V -o                                                                    
+-T SelectVariants -R -V  -selectType SNP -o # SNP extraction
+-T VariantFiltration -R - V -filter "QD < 2.0 || FS > 60.0 || SOR > 3.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0" -filterName -o # SNP filtration
+-T SelectVariants -R -V -selectType INDEL -o # INDEL extraction
+-T VariantFiltration -R -V -filter "QD < 2.0 || FS > 200.0 || SOR > 10.0 || ReadPosRankSum < -20.0" -filterName -o # INDEL filtration
+
 
 ```
 ## Script 4. Transposable element genome annotation

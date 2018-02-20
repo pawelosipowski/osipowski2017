@@ -43,6 +43,10 @@ samblaster -i -o
 pilon-1.20.jar --genome --bam --output --vcf --chunksize 12000000 --diploid
 run_BUSCO.py -i -o -l -m genome -c 5 -sp arabidopsis --long
 ```
+## Yang et al. 2013 primer data alignment
+```
+bwa mem -k 5 -t 20 -r 0.1 -c 1000000
+```
 ## Script 3. Short read alignment for variant calling
 ```
 trimmomatic-0.35.jar PE  ILLUMINACLIP:Trimmomatic-0.35/adapters/TruSeq3-PE.fa:2:30:15 TRAILING:30 MINLEN:50

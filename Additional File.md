@@ -43,11 +43,11 @@ samblaster -i -o
 pilon-1.20.jar --genome --bam --output --vcf --chunksize 12000000 --diploid
 run_BUSCO.py -i -o -l -m genome -c 5 -sp arabidopsis --long
 ```
-## Yang et al. 2013 primer data alignment
+## Script 3. Yang et al. 2013 primer data alignment
 ```
 bwa mem -k 5 -t 20 -r 0.1 -c 1000000
 ```
-## Script 3. Short read alignment for variant calling
+## Script 4. Short read alignment for variant calling
 ```
 trimmomatic-0.35.jar PE  ILLUMINACLIP:Trimmomatic-0.35/adapters/TruSeq3-PE.fa:2:30:15 TRAILING:30 MINLEN:50
 bfc -s 367m -t16 -k 55 
@@ -55,7 +55,7 @@ bwa index
 bwa mem -t 7 -R 
 samblaster -i -o
 ```
-## Script 4. Freebayses variant calling, genotyping and filtering commands
+## Script 5. Freebayses variant calling, genotyping and filtering commands
 ```
 mdust -w 6 -v 20 -c 
 samtools faidx 
@@ -70,31 +70,55 @@ vcffilter -f "SAF > 5"
 vcffilter -f "SAR > 5" 
 
 ```
-## Script 5. GATK variant calling, joint genotyping and filtering commands
+## Script 6. DeepVariant variant calling shell script template
 ```
--T HaplotypeCaller -R -I --genotyping_mode DISCOVERY -stand_emit_conf 10 -stand_call_conf 30 -o
--T BaseRecalibrator -R -I -knownSites -o # for known sites Freebayes results were used
--T BaseRecalibrator -R -I -knownSites -BQSR -o # second recallibration round
--T AnalyzeCovariates -R -before -after -plots
--T PrintReads -R -I-BQSR -o
--T HaplotypeCaller -R -I --emitRefConfidence -o
--T GenotypeGVCFs -R -V -V -o # joint genoyping                                                                   
--T SelectVariants -R -V  -selectType SNP -o # SNP extraction
--T VariantFiltration -R - V -filter "QD < 2.0 || FS > 60.0 || SOR > 3.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0" -filterName -o # SNP filtration
--T SelectVariants -R -V -selectType INDEL -o # INDEL extraction
--T VariantFiltration -R -V -filter "QD < 2.0 || FS > 200.0 || SOR > 10.0 || ReadPosRankSum < -20.0" -filterName -o # INDEL filtration
+SMPL=
+REF=
+BAM=
+DV_FOLDER=
+MODEL_NAME=DeepVariant-inception_v3-0.4.0+cl-174375304.data-wgs_standard
+
+OUTPUT_DIR="${SMPL}_output"
+mkdir -p "${OUTPUT_DIR}"
+MODEL="${DV_FOLDER}/${MODEL_NAME}/model.ckpt"
+
+LOGDIR="./logs_${SMPL}"
+N_SHARDS=6
+
+#mkdir -p "${LOGDIR}"
+#time seq 0 $((N_SHARDS-1)) | \
+  parallel --eta --halt 2 --joblog "${LOGDIR}/log" --res "${LOGDIR}" \
+  python "${DV_FOLDER}/bazel-bin/deepvariant/make_examples.zip" \
+    --mode calling \
+    --ref "${REF}" \
+    --reads "${BAM}" \
+    --examples "${OUTPUT_DIR}/examples.tfrecord@${N_SHARDS}.gz" \
+    --task {}
+CALL_VARIANTS_OUTPUT="${OUTPUT_DIR}/call_variants_output.tfrecord.gz"
+
+python "${DV_FOLDER}/bazel-bin/deepvariant/call_variants.zip" \
+ --outfile "${CALL_VARIANTS_OUTPUT}" \
+ --examples "${OUTPUT_DIR}/examples.tfrecord@${N_SHARDS}.gz" \
+ --checkpoint "${MODEL}"
+
+FINAL_OUTPUT_VCF="${OUTPUT_DIR}/output_${SMPL}.vcf.gz"
+
+python  "${DV_FOLDER}/bazel-bin/deepvariant/postprocess_variants.zip" \
+  --ref "${REF}" \
+  --infile "${CALL_VARIANTS_OUTPUT}" \
+  --outfile "${FINAL_OUTPUT_VCF}"
 ```
-## Script 6. GRIDSS SV calling
+## Script 7. GRIDSS SV calling
 ```
 gridss O= ASSEMBLY= REFERENCE_SEQUENCE= I= TMP_DIR= WORKING_DIR= THREADS=7 
 ```
-## Script 7. Transposable element genome annotation
+## Script 8. Transposable element genome annotation
 ```
 BuildDatabase -name 
 RepeatModeler -pa 16 -database 
 RepeatMasker -pa 22 -s -no_is -nolow -norna -lib -xm -ace -u -gff -excln -dir 
 ```
-## Script 8. Trancriptome-based genome structural annotation (main approach)
+## Script 9. Trancriptome-based genome structural annotation (main approach)
 ```
 RepeatMasker -pa 12 -species viridiplantae -xsmall -gff -dir 
 CpGcluster.pl CpG 50 1e-5 
@@ -136,7 +160,7 @@ blastp -query -db -max_target_seqs 1 -outfmt 6 -evalue 1e-5 -num_threads 8
 TransDecoder.Predict -t --single_best_orf --retain_pfam_hits --retain_blastp_hits --cpu 8
 cdna_alignment_orf_to_genome_orf.pl
 ```
-## Script 9. Ab initio genome structural annotation (complementary approach)
+## Script 10. Ab initio genome structural annotation (complementary approach)
 ```
 tophat2 --num-threads 12 -o
 braker.pl --AUGUSTUS_CONFIG_PATH= --AUGUSTUS_BIN_PATH= --AUGUSTUS_SCRIPTS_PATH= --BAMTOOLS_PATH= --GENEMARK_PATH= --cores 20 --species= --gff3 --genome= --bam=
